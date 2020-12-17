@@ -8,6 +8,6 @@ import (
 var dockerClient = getDockerClient()
 
 func main() {
-	http.HandleFunc("/container/", getContainer)
+	http.HandleFunc("/", handler)
 	log.Fatal(http.ListenAndServe(":3000", nil))
 }
