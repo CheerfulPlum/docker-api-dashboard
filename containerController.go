@@ -28,10 +28,9 @@ func getContainer(w http.ResponseWriter, r *http.Request, slug string) int {
 }
 
 func containersList(w http.ResponseWriter, r *http.Request) int {
-
-	containers := listContainers(dockerClient)
-
-	jsonCont, err := json.Marshal(containers)
+	// containerListMutex.Lock()
+	jsonCont, err := json.Marshal(containerList)
+	// containerListMutex.Unlock()
 	if err != nil {
 		return errorResponse(w, http.StatusInternalServerError, err.Error())
 	}
