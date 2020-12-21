@@ -9,7 +9,7 @@ import (
 func getContainer(w http.ResponseWriter, r *http.Request, slug string) int {
 	containerID := slug
 
-	containers := listContainers(dockerClient)
+	containers := containerList
 	container, err := findContainerInList(containerID, containers)
 
 	if err != nil {
@@ -21,7 +21,7 @@ func getContainer(w http.ResponseWriter, r *http.Request, slug string) int {
 		return errorResponse(w, http.StatusInternalServerError, err.Error())
 	}
 
-	w.Header().Set("Content-Type", "application/json")
+	setHeaders(w)
 	fmt.Fprint(w, string(jsonCont))
 
 	return http.StatusOK
@@ -35,7 +35,7 @@ func containersList(w http.ResponseWriter, r *http.Request) int {
 		return errorResponse(w, http.StatusInternalServerError, err.Error())
 	}
 
-	w.Header().Set("Content-Type", "application/json")
+	setHeaders(w)
 	fmt.Fprint(w, string(jsonCont))
 
 	return http.StatusOK

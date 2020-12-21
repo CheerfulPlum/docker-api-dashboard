@@ -2,12 +2,12 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"regexp"
 	"strconv"
 	"sync"
-	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -31,17 +31,28 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		responseStatus = errorResponse(w, http.StatusNotFound, "404: Not found")
 	}
 
-	// Log to console
-	fmt.Println(time.Now().Format(time.RFC3339) + " - " + fmt.Sprint(responseStatus) + " - " + path)
+	// Log request
+	logRequest(path, responseStatus)
 }
 
 func errorResponse(w http.ResponseWriter, code int, message string) int {
-	w.Header().Set("Content-Type", "application/json")
+	setHeaders(w)
 	w.WriteHeader(code)
 	en := json.NewEncoder(w)
 	en.Encode(map[string]string{"message": message})
 
 	return code
+}
+
+func setHeaders(w http.ResponseWriter) {
+	w.Header().Set("Content-Type", "application/json")
+}
+
+func logRequest(url string, code int) {
+	log.WithFields(log.Fields{
+		"url":  url,
+		"code": code,
+	}).Info("Request")
 }
 
 // Stolen to do regex matching
