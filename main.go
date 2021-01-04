@@ -13,15 +13,13 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var dockerClient = docker.GetDockerClient()
-
 // Refresh interval in seconds
 var refreshInterval = 5
 
 var defaultLogLevel = "info"
 
 // Initialize
-var containerList = docker.ListContainers(dockerClient)
+var containerList = docker.ListContainers()
 
 func main() {
 	godotenv.Load()
@@ -34,7 +32,7 @@ func main() {
 	go func() {
 		for {
 			log.Debug("Updating container list")
-			containerList = docker.ListContainers(dockerClient)
+			containerList = docker.ListContainers()
 			time.Sleep(time.Duration(refreshInterval) * time.Second)
 			log.Debug("Success, " + strconv.Itoa(len(containerList)) + " containers available")
 			log.Trace(containerList)

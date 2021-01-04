@@ -15,22 +15,21 @@ import (
 var (
 	// ContainerList con
 	ContainerList []Container
+	dockerClient  *client.Client
 )
 
-// GetDockerClient get a new docker client
-func GetDockerClient() *client.Client {
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+func init() {
+	var err error
+	dockerClient, err = client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	return cli
 }
 
 // ListContainers get an an array of containers back
-func ListContainers(client *client.Client) []Container {
-	containers, err := client.ContainerList(context.Background(), types.ContainerListOptions{})
+func ListContainers() []Container {
+	containers, err := dockerClient.ContainerList(context.Background(), types.ContainerListOptions{})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -38,7 +37,8 @@ func ListContainers(client *client.Client) []Container {
 	conList := make([]Container, len(containers))
 
 	for i := 0; i < len(containers); i++ {
-		conList[i] = Container{Container: containers[i], VirtualHost: GetContainerVirutalHost(containers[i].ID, client), VirtualPort: GetContainerVirutalPort(containers[i].ID, client)}
+		virutalHost, virtualPort := GetContainerVirutalEnvs(containers[i].ID)
+		conList[i] = Container{Container: containers[i], VirtualHost: virutalHost, VirtualPort: virtualPort}
 	}
 
 	return conList
@@ -67,38 +67,27 @@ func IsContainerHealthy(container *Container) bool {
 	return true
 }
 
-// GetContainerVirutalHost return a string indicating the Virtual host environment variable for the container
-func GetContainerVirutalHost(containerID string, client *client.Client) string {
+// GetContainerVirutalEnvs return the virtual host and port env var from the container
+func GetContainerVirutalEnvs(containerID string) (string, int) {
 	vHostString := "VIRTUAL_HOST="
+	vPortString := "VIRTUAL_PORT="
 
 	// Grab the env vars for the container
-	inspect, _ := client.ContainerInspect(context.Background(), containerID)
+	inspect, _ := dockerClient.ContainerInspect(context.Background(), containerID)
 	envs := inspect.Config.Env
 	vHost := ""
-	for i := 0; i < len(envs); i++ {
-		if strings.Contains(envs[i], vHostString) {
-			vHost = envs[i][len(vHostString):]
-			break
-		}
-	}
-
-	return vHost
-}
-
-// GetContainerVirutalPort return an int indicating the Virtual port environment variable for the container
-func GetContainerVirutalPort(containerID string, client *client.Client) int {
-	vHostString := "VIRTUAL_PORT="
-
-	// Grab the env vars for the container
-	inspect, _ := client.ContainerInspect(context.Background(), containerID)
-	envs := inspect.Config.Env
 	vPort := 0
 	for i := 0; i < len(envs); i++ {
 		if strings.Contains(envs[i], vHostString) {
-			vPort, _ = strconv.Atoi(envs[i][len(vHostString):])
+			vHost = envs[i][len(vHostString):]
+		} else if strings.Contains(envs[i], vPortString) {
+			vPort, _ = strconv.Atoi(envs[i][len(vPortString):])
+		}
+
+		if vHost != "" && vPort != 0 {
 			break
 		}
 	}
 
-	return vPort
+	return vHost, vPort
 }
