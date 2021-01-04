@@ -18,7 +18,7 @@ var dockerClient = docker.GetDockerClient()
 // Refresh interval in seconds
 var refreshInterval = 5
 
-var defaultLogLevel = "warn"
+var defaultLogLevel = "info"
 
 // Initialize
 var containerList = docker.ListContainers(dockerClient)
