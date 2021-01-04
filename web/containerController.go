@@ -51,7 +51,7 @@ func getContainerHealth(w http.ResponseWriter, r *http.Request, slug string) int
 		return errorResponse(w, http.StatusNotFound, "Container not found - "+containerID)
 	}
 
-	json, _ := json.Marshal(docker.ContainerHealth{StatusText: container.Status, IsContainerHealthy: docker.IsContainerHealthy(container)})
+	json, _ := json.Marshal(docker.ContainerHealth{StatusText: container.Container.Status, IsContainerHealthy: docker.IsContainerHealthy(container)})
 
 	setHeaders(w)
 	fmt.Fprint(w, string(json))

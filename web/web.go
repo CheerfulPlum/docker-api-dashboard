@@ -1,13 +1,13 @@
 package web
 
 import (
+	"docker-dashboard-api/docker"
 	"encoding/json"
 	"net/http"
 	"regexp"
 	"strconv"
 	"sync"
 
-	"github.com/docker/docker/api/types"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -15,7 +15,7 @@ var (
 	regexen = make(map[string]*regexp.Regexp)
 	relock  sync.Mutex
 	// ContainerList con
-	ContainerList []types.Container
+	ContainerList []docker.Container
 )
 
 // Handler handle
