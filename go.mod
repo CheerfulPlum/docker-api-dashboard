@@ -1,4 +1,4 @@
-module docker-dashboard
+module docker-dashboard-api
 
 go 1.15
 

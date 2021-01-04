@@ -1,6 +1,8 @@
 package main
 
 import (
+	"docker-dashboard-api/docker"
+	"docker-dashboard-api/web"
 	"io"
 	"net/http"
 	"os"
@@ -11,7 +13,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var dockerClient = getDockerClient()
+var dockerClient = docker.GetDockerClient()
 
 // Refresh interval in seconds
 var refreshInterval = 5
@@ -19,9 +21,7 @@ var refreshInterval = 5
 var defaultLogLevel = "warn"
 
 // Initialize
-var containerList = listContainers(dockerClient)
-
-// var containerListMutex = sync.Mutex{}
+var containerList = docker.ListContainers(dockerClient)
 
 func main() {
 	godotenv.Load()
@@ -33,17 +33,16 @@ func main() {
 	// Update container list async
 	go func() {
 		for {
-			// containerListMutex.Lock()
 			log.Debug("Updating container list")
-			containerList = listContainers(dockerClient)
-			// containerListMutex.Unlock()
+			containerList = docker.ListContainers(dockerClient)
 			time.Sleep(time.Duration(refreshInterval) * time.Second)
 			log.Debug("Success, " + strconv.Itoa(len(containerList)) + " containers available")
 			log.Trace(containerList)
 		}
 	}()
 
-	http.HandleFunc("/", handler)
+	web.ContainerList = containerList
+	http.HandleFunc("/", web.Handler)
 	log.Fatal(http.ListenAndServe(":3000", nil))
 }
 
