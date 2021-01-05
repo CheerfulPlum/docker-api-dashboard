@@ -11,8 +11,7 @@ import (
 func getContainer(w http.ResponseWriter, r *http.Request, slug string) int {
 	containerID := slug
 
-	containers := ContainerList
-	container, err := docker.FindContainerInList(containerID, containers)
+	container, err := docker.FindContainerInList(containerID)
 
 	if err != nil {
 		return errorResponse(w, http.StatusNotFound, "Container not found - "+containerID)
@@ -44,8 +43,7 @@ func getContainersIndex(w http.ResponseWriter, r *http.Request) int {
 func getContainerHealth(w http.ResponseWriter, r *http.Request, slug string) int {
 	containerID := slug
 
-	containers := ContainerList
-	container, err := docker.FindContainerInList(containerID, containers)
+	container, err := docker.FindContainerInList(containerID)
 
 	if err != nil {
 		return errorResponse(w, http.StatusNotFound, "Container not found - "+containerID)

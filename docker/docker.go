@@ -27,8 +27,8 @@ func init() {
 	}
 }
 
-// ListContainers get an an array of containers back
-func ListContainers() []Container {
+// RefreshContainerList get an an array of containers back
+func RefreshContainerList() []Container {
 	containers, err := dockerClient.ContainerList(context.Background(), types.ContainerListOptions{})
 	if err != nil {
 		log.Fatal(err)
@@ -41,12 +41,14 @@ func ListContainers() []Container {
 		conList[i] = Container{Container: containers[i], VirtualHost: virutalHost, VirtualPort: virtualPort}
 	}
 
+	ContainerList = conList
+
 	return conList
 }
 
 // FindContainerInList find a container by it's ID in a list of contaienrs
-func FindContainerInList(containerID string, containers []Container) (*Container, error) {
-	for _, container := range containers {
+func FindContainerInList(containerID string) (*Container, error) {
+	for _, container := range ContainerList {
 		if container.Container.ID == containerID {
 			return &container, nil
 		}

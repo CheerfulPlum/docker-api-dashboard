@@ -18,9 +18,6 @@ var refreshInterval = 5
 
 var defaultLogLevel = "info"
 
-// Initialize
-var containerList = docker.ListContainers()
-
 func main() {
 	godotenv.Load()
 	file := setupLogging()
@@ -31,15 +28,18 @@ func main() {
 	// Update container list async
 	go func() {
 		for {
+			// Refresh the list of containerss
+			docker.RefreshContainerList()
+			web.ContainerList = docker.ContainerList
 			log.Debug("Updating container list")
-			containerList = docker.ListContainers()
+			log.Debug("Success, " + strconv.Itoa(len(docker.ContainerList)) + " containers available")
+			log.Trace(docker.ContainerList)
+			// Refresh after a period of time
 			time.Sleep(time.Duration(refreshInterval) * time.Second)
-			log.Debug("Success, " + strconv.Itoa(len(containerList)) + " containers available")
-			log.Trace(containerList)
+
 		}
 	}()
 
-	web.ContainerList = containerList
 	http.HandleFunc("/", web.Handler)
 	log.Fatal(http.ListenAndServe(":3000", nil))
 }
