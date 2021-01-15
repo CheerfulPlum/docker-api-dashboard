@@ -1,0 +1,10 @@
+version: '3.4'
+services:
+  docker-dashboard-api:
+    build: .
+    container_name: 'docker-dashboard-api'
+    restart: always
+    ports:
+      3000:3000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
